@@ -1,0 +1,116 @@
+### Power BI DAX Measures
+
+DAX Measures (Copy into Power BI)
+
+dax// Measure 1: Total Appointments
+
+Total Appointments = 
+
+COUNTROWS(appointments)
+
+// Measure 2: No-Show Count
+
+No-Shows = 
+
+SUMX(
+
+    appointments,
+
+    IF(appointments[no_show] = 1, 1, 0)
+
+)
+
+// Alternative simpler version:
+
+No-Shows = SUM(appointments[no_show])
+
+// Measure 3: No-Show Percentage
+
+No-Show Rate = 
+
+DIVIDE(
+
+    [No-Shows],
+
+    [Total Appointments],
+
+    0
+
+)
+
+// Format this as Percentage in the Measure tools
+
+// Measure 4: Show-Up Count (Attended)
+
+Attended = 
+
+[Total Appointments] - [No-Shows]
+
+// Measure 5: Attendance Rate
+
+Attendance Rate = 
+
+DIVIDE(
+
+    [Attended],
+
+    [Total Appointments],
+
+    0
+
+)
+
+// Measure 6: Average Wait Days
+
+Avg Wait Days = 
+
+AVERAGE(appointments[wait_days])
+
+// Measure 7: Total Patients (Distinct Count)
+
+Total Patients = 
+
+DISTINCTCOUNT(appointments[patient_id])
+
+// Measure 8: No-Show Rate vs Average (for conditional formatting)
+
+No-Show vs Avg = 
+
+VAR AvgNoShowRate = 
+
+    CALCULATE(
+
+        [No-Show Rate],
+
+        ALL(appointments[clinic])
+
+    )
+
+RETURN
+
+    [No-Show Rate] - AvgNoShowRate
+
+// Measure 9: Appointments This Month
+
+Appointments This Month = 
+
+CALCULATE(
+
+    [Total Appointments],
+
+    DATESMTD(appointments[appointment_date])
+
+)
+
+// Measure 10: No-Shows Previous Month (for comparison)
+
+No-Shows Prev Month = 
+
+CALCULATE(
+
+    [No-Shows],
+
+    PREVIOUSMONTH(appointments[appointment_date])
+
+)
+
