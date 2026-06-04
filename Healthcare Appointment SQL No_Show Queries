@@ -1,0 +1,64 @@
+### Healthcare Appointment SQL No_Show Queries
+
+-- Create appointments table
+CREATE TABLE appointments (
+    appointment_id VARCHAR(50) PRIMARY KEY,
+    patient_id BIGINT NOT NULL,
+    clinic VARCHAR(100),
+    scheduled_date DATE NOT NULL,
+    appointment_date DATE NOT NULL,
+    no_show INT CHECK (no_show IN (0, 1)),
+    gender VARCHAR(10),
+    age INT CHECK (age >= 0 AND age <= 100),
+    wait_days INT,
+    appointment_time TIME
+);
+
+-- Optional: Create index for faster queries
+CREATE INDEX idx_clinic ON appointments(clinic);
+CREATE INDEX idx_appointment_date ON appointments(appointment_date);
+CREATE INDEX idx_no_show ON appointments(no_show);
+
+KPI Query Scripts
+sql-- KPI 1: Total Appointments
+SELECT 
+    COUNT(*) AS total_appointments
+FROM appointments;
+
+-- KPI 2: No-Show Count
+SELECT 
+    SUM(no_show) AS no_show_count
+FROM appointments;
+
+-- KPI 3: Overall No-Show Percentage
+SELECT 
+    ROUND(SUM(no_show) * 100.0 / COUNT(*), 2) AS no_show_percentage
+FROM appointments;
+
+-- KPI 4: No-Show Percentage by Clinic
+SELECT 
+    clinic,
+    COUNT(*) AS total_appointments,
+    SUM(no_show) AS no_shows,
+    ROUND(SUM(no_show) * 100.0 / COUNT(*), 2) AS no_show_percentage
+FROM appointments
+GROUP BY clinic
+ORDER BY no_show_percentage DESC;
+
+-- KPI 5: Average Wait Days (Scheduled to Appointment)
+SELECT 
+    ROUND(AVG(wait_days), 1) AS avg_wait_days
+FROM appointments
+WHERE wait_days >= 0;  -- Exclude negative wait times (data errors)
+
+-- KPI 6: Top 5 Clinics by No-Show Count
+SELECT TOP 5
+    clinic,
+    SUM(no_show) AS total_no_shows,
+    COUNT(*) AS total_appointments,
+    ROUND(SUM(no_show) * 100.0 / COUNT(*), 2) AS no_show_percentage
+FROM appointments
+GROUP BY clinic
+ORDER BY total_no_shows DESC;
+
+
