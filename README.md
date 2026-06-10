@@ -83,8 +83,8 @@ The dataset includes an appointment_time field in the schema but this was not re
 - `README.md`: This documentation
 
 ## Tools Used
-- Power BI Desktop**: Dashboard development and DAX measures. Build an interactive dashboard that highlights key patterns and trends, enabling stakeholders to make data-driven decisions.
-- **SQL**: Data querying and KPI calculations
-- **Power Query**: Data cleaning and transformation
-- **Data Preparation,Modeling & Exploratory Data Analysis Python (pandas)**: Alternative data cleaning pipeline and transform the raw dataset for analysis.
+- Power BI Desktop: Dashboard development and DAX measures. Build an interactive dashboard that highlights key patterns and trends, enabling stakeholders to make data-driven decisions.
+- SQL: Data querying and KPI calculations
+- Power Query: Data cleaning and transformation
+- Data Preparation,Modeling & Exploratory Data Analysis Python (pandas)**: Alternative data cleaning pipeline and transform the raw dataset for analysis.
 
