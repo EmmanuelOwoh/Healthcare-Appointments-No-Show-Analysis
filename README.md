@@ -17,7 +17,7 @@ This project answers three core questions:
 ## Dataset
 - Source: Kaggle - Medical Appointment No Shows (Brazil, 2016)
 - Raw records: 110,527 appointments across 81 clinics
-## Columns used:
+### Columns used:
 - Patient_id: Unique patient identifier
   
 - Appointment_id: Unique appointment identifier
