@@ -7,6 +7,7 @@ Tools: Python (pandas), SQL (SQL Server), Power BI Desktop, Power Query, DAX
 
 ## Business Problem
 Missed medical appointments are costly for healthcare providers and harmful to patients. Understanding which patients are most likely to miss their appointments, and why, allows clinics to act before the appointment is missed rather than after.
+
 This project answers three core questions:
 
 1. What is the overall no-show rate and how does it vary across clinics?
@@ -18,17 +19,29 @@ This project answers three core questions:
 - Raw records: 110,527 appointments across 81 clinics
 ## Columns used:
 - Patient_id: Unique patient identifier
+  
 - Appointment_id: Unique appointment identifier
+  
 - Gender: Patient gender (M/F)
+  
 - Scheduled_date: Date the patient booked the appointment
+  
 - Appointment_date: Date of the scheduled appointment
+  
 - Age: Patient age
+  
 - Clinic: Clinic name (neighbourhood)
+  
 - Scholarship: Indicates if the patient receives welfare (1 = Yes)
+  
 - Hipertension: Hypertension diagnosis flag
+  
 - Diabetes: Diabetes diagnosis flag
+  
 - Sms_received: Indicates if the patient received an SMS reminder (1 = Yes)
+  
 - No_show: Target variable where 1 means the patient did not attend and 0 means the patient attended
+  
 - Wait_days: Calculated days between booking and appointment.
 
 ## Data Cleaning Step
