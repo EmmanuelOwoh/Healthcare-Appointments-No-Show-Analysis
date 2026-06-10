@@ -14,22 +14,22 @@ This project answers three core questions:
 3. What practical steps can reduce no-show rates?
 
 ## Dataset
-Source: Kaggle - Medical Appointment No Shows (Brazil, 2016)
-Raw records: 110,527 appointments across 81 clinics
-Columns used:
-Patient_id: Unique patient identifier
-Appointment_id: Unique appointment identifier
-Gender: Patient gender (M/F)
-Scheduled_date: Date the patient booked the appointment
-Appointment_date: Date of the scheduled appointment
-Age: Patient age
-Clinic: Clinic name (neighbourhood)
-Scholarship: Indicates if the patient receives welfare (1 = Yes)
-Hipertension: Hypertension diagnosis flag
-Diabetes: Diabetes diagnosis flag
-Sms_received: Indicates if the patient received an SMS reminder (1 = Yes)
-No_show: Target variable where 1 means the patient did not attend and 0 means the patient attended
-Wait_days: Calculated days between booking and appointment.
+- Source: Kaggle - Medical Appointment No Shows (Brazil, 2016)
+- Raw records: 110,527 appointments across 81 clinics
+## Columns used:
+- Patient_id: Unique patient identifier
+- Appointment_id: Unique appointment identifier
+- Gender: Patient gender (M/F)
+- Scheduled_date: Date the patient booked the appointment
+- Appointment_date: Date of the scheduled appointment
+- Age: Patient age
+- Clinic: Clinic name (neighbourhood)
+- Scholarship: Indicates if the patient receives welfare (1 = Yes)
+- Hipertension: Hypertension diagnosis flag
+- Diabetes: Diabetes diagnosis flag
+- Sms_received: Indicates if the patient received an SMS reminder (1 = Yes)
+- No_show: Target variable where 1 means the patient did not attend and 0 means the patient attended
+- Wait_days: Calculated days between booking and appointment.
 
 ## Data Cleaning Step
 All cleaning was performed in Python using pandas. The notebook is included in this repository.
@@ -57,11 +57,11 @@ No-show rates vary widely across the 81 clinics in the dataset. The top 5 clinic
 Female patients showed a slightly higher attendance rate (78.8%) compared to male patients (77.4%). This gap is small and should not be the primary focus of any intervention.
 
 ## Assumptions
-A no_show value of 1 means the patient did not attend. A value of 0 means they attended.
-Appointments where wait_days equals 0 (booked and scheduled on the same day) are treated as valid.
-All records are from the local Brazilian timezone.
-Patients under 18 are included in the analysis as they appear as valid appointment holders in the dataset.
-The SMS reminder analysis does not establish causation. The correlation between SMS receipt and higher no-show rates is likely explained by confounding with wait time.
+- A no_show value of 1 means the patient did not attend. A value of 0 means they attended.
+- Appointments where wait_days equals 0 (booked and scheduled on the same day) are treated as valid.
+- All records are from the local Brazilian timezone.
+- Patients under 18 are included in the analysis as they appear as valid appointment holders in the dataset.
+- The SMS reminder analysis does not establish causation. The correlation between SMS receipt and higher no-show rates is likely explained by confounding with wait time.
 
 ## Recommendations
 1. Target Long Wait Times First
