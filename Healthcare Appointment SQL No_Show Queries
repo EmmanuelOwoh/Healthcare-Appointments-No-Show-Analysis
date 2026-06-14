@@ -1,64 +1,222 @@
 ### Healthcare Appointment SQL No_Show Queries
 
--- Create appointments table
-CREATE TABLE appointments (
-    appointment_id VARCHAR(50) PRIMARY KEY,
-    patient_id BIGINT NOT NULL,
-    clinic VARCHAR(100),
-    scheduled_date DATE NOT NULL,
-    appointment_date DATE NOT NULL,
-    no_show INT CHECK (no_show IN (0, 1)),
-    gender VARCHAR(10),
-    age INT CHECK (age >= 0 AND age <= 100),
-    wait_days INT,
-    appointment_time TIME
+-- ============================================================
+-- Healthcare Appointments No-Show Analysis
+-- SQL KPI Queries
+-- Database: SQL Server
+-- Author: Chukwuebuka Owoh
+-- Dataset: 110,519 cleaned appointment records
+-- ============================================================
+
+-- ============================================================
+-- SECTION 1: TABLE SCHEMA
+-- ============================================================
+
+-- CREATE TABLE appointments (
+    appointment_id  VARCHAR(50)  PRIMARY KEY,
+    patient_id      BIGINT       NOT NULL,
+    clinic          VARCHAR(100),
+    scheduled_date  DATE         NOT NULL,
+    appointment_date DATE        NOT NULL,
+    appointment_time TIME,
+    no_show         INT          CHECK (no_show IN (0, 1)),
+    gender          VARCHAR(10),
+    age             INT          CHECK (age >= 0 AND age <= 100),
+    wait_days       INT,
+    scholarship     INT          CHECK (scholarship IN (0, 1)),
+    hipertension    INT          CHECK (hipertension IN (0, 1)),
+    diabetes        INT          CHECK (diabetes IN (0, 1)),
+    alcoholism      INT          CHECK (alcoholism IN (0, 1)),
+    handcap         INT,
+    sms_received    INT          CHECK (sms_received IN (0, 1))
 );
 
--- Optional: Create index for faster queries
-CREATE INDEX idx_clinic ON appointments(clinic);
+-- Indexes for faster filtering and grouping on commonly queried columns
+CREATE INDEX idx_clinic           ON appointments(clinic);
 CREATE INDEX idx_appointment_date ON appointments(appointment_date);
-CREATE INDEX idx_no_show ON appointments(no_show);
+CREATE INDEX idx_no_show          ON appointments(no_show);
+CREATE INDEX idx_sms_received     ON appointments(sms_received);
+CREATE INDEX idx_wait_days        ON appointments(wait_days);
 
-KPI Query Scripts
-sql-- KPI 1: Total Appointments
-SELECT 
+
+-- ============================================================
+-- SECTION 2: CORE KPIs
+-- ============================================================
+
+-- KPI 1: Total Appointments
+-- Gives the total number of cleaned records loaded into the table.
+-- Expected result: 110,519
+SELECT
     COUNT(*) AS total_appointments
 FROM appointments;
 
+
 -- KPI 2: No-Show Count
-SELECT 
+-- Total number of patients who did not attend their appointment.
+-- no_show = 1 means patient did not attend.
+-- Expected result: ~22,319
+SELECT
     SUM(no_show) AS no_show_count
 FROM appointments;
 
+
 -- KPI 3: Overall No-Show Percentage
-SELECT 
+-- Percentage of all appointments that resulted in a no-show.
+-- Expected result: ~20.2%
+SELECT
     ROUND(SUM(no_show) * 100.0 / COUNT(*), 2) AS no_show_percentage
 FROM appointments;
 
+
 -- KPI 4: No-Show Percentage by Clinic
-SELECT 
+-- Ranks all clinics by no-show rate to identify the highest-risk locations.
+-- Use this to prioritise where intervention is most needed.
+SELECT
     clinic,
-    COUNT(*) AS total_appointments,
-    SUM(no_show) AS no_shows,
-    ROUND(SUM(no_show) * 100.0 / COUNT(*), 2) AS no_show_percentage
+    COUNT(*)                                          AS total_appointments,
+    SUM(no_show)                                      AS no_shows,
+    ROUND(SUM(no_show) * 100.0 / COUNT(*), 2)        AS no_show_percentage
 FROM appointments
 GROUP BY clinic
 ORDER BY no_show_percentage DESC;
 
--- KPI 5: Average Wait Days (Scheduled to Appointment)
-SELECT 
-    ROUND(AVG(wait_days), 1) AS avg_wait_days
+
+-- KPI 5: Average Wait Days
+-- Average number of days between when an appointment was booked
+-- and when it was scheduled to occur.
+-- Negative wait_days indicate data entry errors and are excluded.
+-- Wait times above 365 days are treated as outliers and excluded.
+-- Expected result: ~10.2 days
+SELECT
+    ROUND(AVG(CAST(wait_days AS FLOAT)), 1) AS avg_wait_days
 FROM appointments
-WHERE wait_days >= 0;  -- Exclude negative wait times (data errors)
+WHERE wait_days BETWEEN 0 AND 365;
+
 
 -- KPI 6: Top 5 Clinics by No-Show Count
+-- Identifies the five clinics responsible for the highest volume
+-- of missed appointments. Targeting these clinics will have the
+-- most immediate impact on overall no-show reduction.
 SELECT TOP 5
     clinic,
-    SUM(no_show) AS total_no_shows,
-    COUNT(*) AS total_appointments,
-    ROUND(SUM(no_show) * 100.0 / COUNT(*), 2) AS no_show_percentage
+    SUM(no_show)                                      AS total_no_shows,
+    COUNT(*)                                          AS total_appointments,
+    ROUND(SUM(no_show) * 100.0 / COUNT(*), 2)        AS no_show_percentage
 FROM appointments
 GROUP BY clinic
 ORDER BY total_no_shows DESC;
 
 
+-- ============================================================
+-- SECTION 3: INSIGHT QUERIES
+-- ============================================================
+
+-- KPI 7: No-Show Rate by SMS Received
+-- Compares no-show rates between patients who received an SMS
+-- reminder and those who did not.
+--
+-- Key finding: Patients who received an SMS had a HIGHER no-show
+-- rate (27.6%) than those who did not (16.7%). This is counterintuitive
+-- and likely explained by confounding with wait time. SMS reminders
+-- appear to have been sent more frequently to patients with longer
+-- wait times, which independently predicts no-shows.
+-- This finding should inform a review of the reminder strategy.
+SELECT
+    CASE sms_received
+        WHEN 1 THEN 'SMS Received'
+        WHEN 0 THEN 'No SMS'
+    END                                               AS sms_status,
+    COUNT(*)                                          AS total_appointments,
+    SUM(no_show)                                      AS no_shows,
+    ROUND(SUM(no_show) * 100.0 / COUNT(*), 2)        AS no_show_percentage
+FROM appointments
+GROUP BY sms_received
+ORDER BY sms_received DESC;
+
+
+-- KPI 8: No-Show Rate by Time of Day
+-- Segments appointments into time slots and compares no-show rates.
+-- Use this to identify which parts of the day carry the highest risk.
+-- Note: appointment_time must be populated for this query to return
+-- meaningful results. Verify data completeness before using in reporting.
+SELECT
+    CASE
+        WHEN DATEPART(HOUR, appointment_time) < 10
+            THEN '1. Morning (Before 10AM)'
+        WHEN DATEPART(HOUR, appointment_time) BETWEEN 10 AND 11
+            THEN '2. Late Morning (10AM - 12PM)'
+        WHEN DATEPART(HOUR, appointment_time) BETWEEN 12 AND 13
+            THEN '3. Midday (12PM - 2PM)'
+        WHEN DATEPART(HOUR, appointment_time) BETWEEN 14 AND 17
+            THEN '4. Afternoon (2PM - 6PM)'
+        ELSE
+            '5. Evening (After 6PM)'
+    END                                               AS time_slot,
+    COUNT(*)                                          AS total_appointments,
+    SUM(no_show)                                      AS no_shows,
+    ROUND(SUM(no_show) * 100.0 / COUNT(*), 2)        AS no_show_percentage
+FROM appointments
+WHERE appointment_time IS NOT NULL
+GROUP BY
+    CASE
+        WHEN DATEPART(HOUR, appointment_time) < 10
+            THEN '1. Morning (Before 10AM)'
+        WHEN DATEPART(HOUR, appointment_time) BETWEEN 10 AND 11
+            THEN '2. Late Morning (10AM - 12PM)'
+        WHEN DATEPART(HOUR, appointment_time) BETWEEN 12 AND 13
+            THEN '3. Midday (12PM - 2PM)'
+        WHEN DATEPART(HOUR, appointment_time) BETWEEN 14 AND 17
+            THEN '4. Afternoon (2PM - 6PM)'
+        ELSE
+            '5. Evening (After 6PM)'
+    END
+ORDER BY time_slot;
+
+
+-- KPI 9: No-Show Rate by Wait Day Band
+-- Groups appointments by how far in advance they were booked
+-- and shows the no-show rate for each band.
+-- Key finding: No-show rates rise significantly beyond 14 days.
+-- This supports the recommendation to keep scheduling windows short.
+SELECT
+    CASE
+        WHEN wait_days = 0              THEN '1. Same Day'
+        WHEN wait_days BETWEEN 1 AND 7  THEN '2. 1 to 7 Days'
+        WHEN wait_days BETWEEN 8 AND 14 THEN '3. 8 to 14 Days'
+        WHEN wait_days BETWEEN 15 AND 30 THEN '4. 15 to 30 Days'
+        WHEN wait_days BETWEEN 31 AND 90 THEN '5. 31 to 90 Days'
+        WHEN wait_days > 90             THEN '6. Over 90 Days'
+    END                                               AS wait_band,
+    COUNT(*)                                          AS total_appointments,
+    SUM(no_show)                                      AS no_shows,
+    ROUND(SUM(no_show) * 100.0 / COUNT(*), 2)        AS no_show_percentage
+FROM appointments
+WHERE wait_days BETWEEN 0 AND 365
+GROUP BY
+    CASE
+        WHEN wait_days = 0              THEN '1. Same Day'
+        WHEN wait_days BETWEEN 1 AND 7  THEN '2. 1 to 7 Days'
+        WHEN wait_days BETWEEN 8 AND 14 THEN '3. 8 to 14 Days'
+        WHEN wait_days BETWEEN 15 AND 30 THEN '4. 15 to 30 Days'
+        WHEN wait_days BETWEEN 31 AND 90 THEN '5. 31 to 90 Days'
+        WHEN wait_days > 90             THEN '6. Over 90 Days'
+    END
+ORDER BY wait_band;
+
+
+-- KPI 10: No-Show Rate by Gender
+-- Compares attendance rates between male and female patients.
+-- Key finding: The gap is small (78.8% vs 77.4% attendance).
+-- Gender should not be the primary focus of no-show interventions.
+SELECT
+    CASE gender
+        WHEN 'F' THEN 'Female'
+        WHEN 'M' THEN 'Male'
+        ELSE 'Unknown'
+    END                                               AS patient_gender,
+    COUNT(*)                                          AS total_appointments,
+    SUM(no_show)                                      AS no_shows,
+    ROUND(SUM(no_show) * 100.0 / COUNT(*), 2)        AS no_show_percentage
+FROM appointments
+GROUP BY gender
+ORDER BY no_show_percentage DESC;
