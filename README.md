@@ -3,6 +3,7 @@
 ## Project Overview
 This project analyses 110,519 medical appointment records from a Brazilian public health system to identify what drives patient no-show behaviour and provide actionable, data-backed recommendations to reduce missed appointments.
 The analysis moves through three stages: data cleaning in Python, KPI querying in SQL, and dashboard visualisation in Power BI.
+
 Tools: Python (pandas), SQL (SQL Server), Power BI Desktop, Power Query, DAX
 
 ## Business Problem
