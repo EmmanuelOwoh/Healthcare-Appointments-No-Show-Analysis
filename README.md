@@ -90,11 +90,11 @@ For time slots and clinics with historically high no-show rates, a 5 to 10 perce
 The dataset includes an appointment_time field in the schema but this was not reliably captured in the raw data. Early morning appointments are reported in healthcare literature to have better attendance. Collecting this data consistently would allow the clinic to test and quantify that pattern.
 
 ## Files In This Repositoryy
-- `appointments_cleaned.csv: Cleaned and transformed dataset ready for SQL and Power BI
-- `healthcare_no_show_cleaning.ipynb: Python notebook: data loading, cleaning, and exploratory analysis
+- appointments_cleaned.csv: Cleaned and transformed dataset ready for SQL and Power BI
+- healthcare_no_show_cleaning.ipynb: Python notebook: data loading, cleaning, and exploratory analysis
 - sql_kpi_queries.sql: MSSQL Server: table schema and KPI queries
-- `healthcare_dashboard.pbix: Power BI report with interactive dashboard
-- `README.md: This documentation
+- healthcare_dashboard.pbix: Power BI report with interactive dashboard
+- README.md: This documentation
 
 ## Tools Used
 - Power BI Desktop: Dashboard development and DAX measures. Build an interactive dashboard that highlights key patterns and trends, enabling stakeholders to make data-driven decisions.
